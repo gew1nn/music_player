@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "631988439569",
+    "project_id": "audio-library-4040b",
+    "storage_bucket": "audio-library-4040b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:631988439569:android:ea0ca44cfefccf4a1e3fb0",
+        "android_client_info": {
+          "package_name": "com.example.audio_player"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8Z5LFIpAhwkmQsL4ATB3YM3xfuOdfovg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
