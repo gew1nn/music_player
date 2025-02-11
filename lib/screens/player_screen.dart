@@ -15,9 +15,10 @@ class MusicPlayerScreen extends StatefulWidget {
   State<MusicPlayerScreen> createState() => _MusicPlayerScreenState();
 }
 
+// state class for MusicPlayerScreen
 class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
-  late AudioPlayer _audioPlayer;
-  int _currentIndex = 0;
+  late AudioPlayer _audioPlayer;  // to handle playback
+  int _currentIndex = 0;  // to track the current song index
 
   @override
   void initState() {
@@ -36,38 +37,40 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
     });
   }
 
+  // method to play the current song
   Future<void> _playCurrentSong() async {
     try {
       final song = widget.songs[_currentIndex];
       final String url = song['url']?.toString().isNotEmpty == true
           ? song['url']
-          : 'https://file-examples.com/storage/fe21422a6d67aa28993b797/2017/11/file_example_MP3_700KB.mp3';
+          : 'https://file-examples.com/storage/fe21422a6d67aa28993b797/2017/11/file_example_MP3_700KB.mp3';  // fallback URL if not
 
       await _audioPlayer.setUrl(url);
       _audioPlayer.play();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to play song: ${e.toString()}')),
+        // show error message if playback fails
       );
     }
   }
 
+  // method to play the next song
   Future<void> _nextSong() async {
-    if (widget.songs.isNotEmpty) {
-      await _audioPlayer.stop();
+    if (widget.songs.isNotEmpty) {  // check if there are any songs
+      await _audioPlayer.stop();  // stop the current song
       setState(() {
-        _currentIndex = (_currentIndex + 1) % widget.songs.length;
+        _currentIndex = (_currentIndex + 1) % widget.songs.length;  // move to next song, loop if necessary
       });
-      await _playCurrentSong();
+      await _playCurrentSong();  // play the next song
     }
   }
-
+  // method to play the previous song
   Future<void> _previousSong() async {
     if (widget.songs.isNotEmpty) {
       await _audioPlayer.stop();
       setState(() {
-        _currentIndex =
-            (_currentIndex - 1 + widget.songs.length) % widget.songs.length;
+        _currentIndex = (_currentIndex - 1 + widget.songs.length) % widget.songs.length;
       });
       await _playCurrentSong();
     }
@@ -75,7 +78,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    _audioPlayer.dispose();  // clean up the audio player
     super.dispose();
   }
 
@@ -97,29 +100,37 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
               child: Image.network(
                 currentSong['cover']?.toString().isNotEmpty == true
                     ? currentSong['cover']
-                    : 'https://cdn.creazilla.com/icons/3431524/music-icon-md.png',
+                    : 'https://cdn.creazilla.com/icons/3431524/music-icon-md.png',  // fallback image if cover is not available
                 width: 300,
                 height: 300,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.music_note, size: 100, color: Colors.white),
+                const Icon(Icons.music_note, size: 100, color: Colors.white),  // show music note icon on error
               ),
             ),
             const SizedBox(height: 20),
             Text(
-              currentSong['title']?.toString() ?? 'No Title',
+              currentSong['title']?.toString() ?? 'No Title',  // display song title
               style: const TextStyle(fontSize: 24, color: Colors.white),
             ),
             Text(
-              currentSong['artist']?.toString() ?? 'No Artist',
+              currentSong['artist']?.toString() ?? 'No Artist',  // display artist name
               style: const TextStyle(fontSize: 16, color: Colors.white70),
             ),
             const SizedBox(height: 20),
             StreamBuilder<Duration>(
               stream: _audioPlayer.positionStream,
               builder: (context, snapshot) {
-                final position = snapshot.data ?? Duration.zero;
-                final totalDuration = _audioPlayer.duration ?? Duration.zero;
+                final position = snapshot.data ?? Duration.zero;  // get the current position
+                final totalDuration = _audioPlayer.duration ?? Duration.zero;  // get the total duration of the song
+
+                //function to form mm:ss
+                String formatDuration(Duration duration) {
+                  int minutes = duration.inMinutes;
+                  int seconds = duration.inSeconds % 60;
+
+                  return '$minutes:${seconds.toString().padLeft(2, '0')}';
+                }
                 return Column(
                   children: [
                     Slider(
@@ -130,7 +141,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       },
                     ),
                     Text(
-                      '${position.toString().split('.').first} / ${totalDuration.toString().split('.').first}',
+                      '${formatDuration(position)} / ${formatDuration(totalDuration)}', // displays mm:ss
                       style: const TextStyle(color: Colors.white70),
                     ),
                   ],
@@ -139,19 +150,19 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
             ),
             const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,  // place buttons evenly across the row
               children: [
                 IconButton(
-                  icon: const Icon(Icons.skip_previous, size: 48, color: Colors.green),
-                  onPressed: _previousSong,
+                  icon: const Icon(Icons.skip_previous, size: 48, color: Colors.green),  // previous song button
+                  onPressed: _previousSong,  // trigger previous song method
                 ),
-                StreamBuilder<PlayerState>(
+                StreamBuilder<PlayerState>(  // the audio player's state (playing or paused)
                   stream: _audioPlayer.playerStateStream,
                   builder: (context, snapshot) {
-                    final isPlaying = snapshot.data?.playing ?? false;
+                    final isPlaying = snapshot.data?.playing ?? false;  // check if the song is currently playing
                     return IconButton(
                       icon: Icon(
-                        isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                        isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,  // change icon based on playback state
                         size: 64,
                         color: Colors.green,
                       ),
@@ -167,7 +178,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.skip_next, size: 48, color: Colors.green),
-                  onPressed: _nextSong,
+                  onPressed: _nextSong,  // trigger next song method
                 ),
               ],
             ),

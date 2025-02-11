@@ -25,7 +25,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("WebView Container"),
+        title: const Text("Discovering"),
       ),
       body: WebViewWidget(controller: controller),
     );

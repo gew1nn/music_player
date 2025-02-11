@@ -20,7 +20,6 @@ class _MainScreenState extends State<MainScreen> {
     const DiscoverScreen(),
   ];
 
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -29,16 +28,13 @@ class _MainScreenState extends State<MainScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData) {  // if no log in
           return const AuthScreen();
         }
-        return Scaffold(
+        return Scaffold(  // if logged in
           body: Stack(
             children: [
-              _screens[_currentIndex],
-              Align(
-                alignment: Alignment.bottomCenter,
-              ),
+              _screens[_currentIndex],  // display the currently selected screen
             ],
           ),
           bottomNavigationBar: BottomNavigationBar(
@@ -48,17 +44,17 @@ class _MainScreenState extends State<MainScreen> {
             currentIndex: _currentIndex,
             onTap: (index) {
               setState(() {
-                _currentIndex = index;
+                _currentIndex = index;  // update the index to switch the screen
               });
             },
-            items: const [
+            items: const [  // defining the items (icons and labels) for the navigation bar
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
                 label: 'Home',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.library_music),
-                label: 'Your Music',
+                label: 'Your Favorites',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.search),

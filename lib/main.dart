@@ -8,6 +8,7 @@ void main() async {
   runApp(const MyApp());
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -17,9 +18,9 @@ class MyApp extends StatelessWidget {
       title: 'Music App',
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: Colors.black,
-        primaryColor: Colors.green,
+        primaryColor: Colors.green, // primary color
       ),
-      home: const MainScreen(),
+      home: const MainScreen(), // initial screen
       debugShowCheckedModeBanner: false,
     );
   }

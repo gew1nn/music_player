@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Home Screen'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: const Icon(Icons.person), // profile icon
             onPressed: () {
               Navigator.push(
                 context,
@@ -25,14 +25,17 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
+        // for the real-time updates in firebase
         stream: FirebaseFirestore.instance.collection('songs').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            // Displays a message if no songs are found.
             return const Center(child: Text('No songs found'));
           }
+          // firebase documents into songs
           final songs = snapshot.data!.docs
               .map((doc) => doc.data() as Map<String, dynamic>)
               .toList();
@@ -52,6 +55,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+// a widget representing a single song
 class SongTile extends StatefulWidget {
   final List<Map<String, dynamic>> songsList;
   final int initialIndex;
@@ -72,9 +76,10 @@ class _SongTileState extends State<SongTile> {
   @override
   void initState() {
     super.initState();
-    _checkIfFavorite();
+    _checkIfFavorite(); // check if the song is in favourites
   }
 
+  // checks if the current song is in the user's favorites
   Future<void> _checkIfFavorite() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -91,6 +96,7 @@ class _SongTileState extends State<SongTile> {
     }
   }
 
+  // toggles the favorite status of the song.
   Future<void> _toggleFavorite() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -102,12 +108,14 @@ class _SongTileState extends State<SongTile> {
           .get();
 
       if (favorites.docs.isEmpty) {
+        // if not already a favorite, add it.
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
             .collection('favorites')
             .add(widget.songsList[widget.initialIndex]);
       } else {
+        // if already a favorite, remove it.
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -130,22 +138,22 @@ class _SongTileState extends State<SongTile> {
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
         child: Image.network(
-          song['cover'],
+          song['cover'], // cover image.
           width: 50,
           height: 50,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) =>
-          const Icon(Icons.music_note),
+          const Icon(Icons.music_note), // shows a music icon if the image fails to load.
         ),
       ),
-      title: Text(song['title']),
-      subtitle: Text(song['artist']),
+      title: Text(song['title']), // song title.
+      subtitle: Text(song['artist']), // artist name.
       trailing: IconButton(
         icon: Icon(
-          _isFavorite ? Icons.favorite : Icons.favorite_border,
+          _isFavorite ? Icons.favorite : Icons.favorite_border, // favorite/unfavorite icon.
           color: _isFavorite ? Colors.red : Colors.white,
         ),
-        onPressed: _toggleFavorite,
+        onPressed: _toggleFavorite, // toggles the favorite status.
       ),
       onTap: () {
         Navigator.push(

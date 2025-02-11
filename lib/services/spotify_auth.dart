@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class SpotifyAuth {
   static const String clientId = '24ffa5d6709f460fab3f7e4f06225560';
   static const String clientSecret = 'b84194e8af77483aab3f6339dd20d39f';
-  static const String tokenUrl = 'https://accounts.spotify.com/api/token';
+  static const String tokenUrl = 'https://accounts.spotify.com/api/token'; //to get a token
 
   static Future<String?> getAccessToken() async {
     final response = await http.post(

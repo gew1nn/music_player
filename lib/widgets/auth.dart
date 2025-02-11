@@ -10,38 +10,40 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
+// state class for AuthScreen
 class _AuthScreenState extends State<AuthScreen> {
   final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
 
+  // controllers for text fields
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
 
-
-  bool _isLogin = true;
+  bool _isLogin = true;  // flag to toggle between login and signup modes
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     try {
       UserCredential userCredential;
-      if (_isLogin) {
+      if (_isLogin) {  // login mode
         userCredential = await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
-      } else {
+      } else {  // signup mode
         userCredential = await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
         String fullName =
             '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
-        await userCredential.user!.updateDisplayName(fullName);
+        await userCredential.user!.updateDisplayName(fullName);  // update the display name after signup
       }
 
+      // store user data in Firestore
       await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
         'email': _emailController.text.trim(),
         'role': 'user',
@@ -69,6 +71,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  // method to toggle between login and signup modes
   void _toggleAuthMode() {
     setState(() {
       _isLogin = !_isLogin;
@@ -77,6 +80,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void dispose() {
+    // dispose the text controllers when the screen is disposed
     _emailController.dispose();
     _passwordController.dispose();
     _firstNameController.dispose();
@@ -89,32 +93,32 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: SingleChildScrollView(
+        child: SingleChildScrollView(  // allow scrolling if the keyboard is shown
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.min,  // minimize column size
             children: [
-              const Icon(Icons.music_note, size: 80, color: Colors.green),
+              const Icon(Icons.music_note, size: 80, color: Colors.green),  // music note icon
               const SizedBox(height: 20),
               Text(
-                _isLogin ? 'Sign in' : 'Sign up',
+                _isLogin ? 'Sign in' : 'Sign up',  // toggle text based on auth mode
                 style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               Form(
-                key: _formKey,
+                key: _formKey,  // assign form key
                 child: Column(
                   children: [
-                    if (!_isLogin) ...[
+                    if (!_isLogin) ...[  // display name fields only in signup mode
                       _buildTextField(_firstNameController, 'Name'),
                       _buildTextField(_lastNameController, 'Surname'),
                     ],
-                    _buildTextField(_emailController, 'Email', TextInputType.emailAddress),
-                    _buildTextField(_passwordController, 'Password', TextInputType.visiblePassword, true),
+                    _buildTextField(_emailController, 'Email', TextInputType.emailAddress),  // email field
+                    _buildTextField(_passwordController, 'Password', TextInputType.visiblePassword, true),  // password field
                     const SizedBox(height: 20),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.green,  // green button color
                         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                       ),
                       onPressed: _submit,
@@ -124,7 +128,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     TextButton(
-                      onPressed: _toggleAuthMode,
+                      onPressed: _toggleAuthMode,  // toggle between login and signup
                       child: Text(
                         _isLogin ? 'Create account' : 'Already have one? Sign in',
                         style: const TextStyle(color: Colors.grey, fontSize: 14),
@@ -144,24 +148,24 @@ class _AuthScreenState extends State<AuthScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
-        controller: controller,
-        keyboardType: type,
-        obscureText: obscureText,
+        controller: controller,  // controller for text input
+        keyboardType: type,  // keyboard type (email, text, etc.)
+        obscureText: obscureText,  // show password as dots if true
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          labelText: label,
+          labelText: label,  // label text for the field
           labelStyle: const TextStyle(color: Colors.grey),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10),  // rounded border for the text field
             borderSide: const BorderSide(color: Colors.grey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Colors.green),
+            borderSide: const BorderSide(color: Colors.green),  // green border on focus
           ),
         ),
         validator: (value) {
-          if (value == null || value.trim().isEmpty) {
+          if (value == null || value.trim().isEmpty) {  // check if the field is not empty
             return 'Enter $label';
           }
           return null;

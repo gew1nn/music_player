@@ -12,12 +12,12 @@ class DiscoverScreen extends StatefulWidget {
 }
 
 class _DiscoverScreenState extends State<DiscoverScreen> {
-  List<dynamic> tracks = [];
+  List<dynamic> tracks = []; // list to hold tracks
 
   @override
   void initState() {
     super.initState();
-    fetchTracks();
+    fetchTracks(); // if token is not available, exit
   }
 
   Future<void> fetchTracks() async {
@@ -39,6 +39,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   @override
+  // building each item in the list
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Discover new releases')),
@@ -52,6 +53,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
+                  // navigating to the WebView screen
                   builder: (context) => WebViewContainer(
                     url: track['external_urls']['spotify'],
                   ),
