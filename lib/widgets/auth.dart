@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../screens/main_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+
 
   bool _isLogin = true;
 
@@ -39,6 +41,12 @@ class _AuthScreenState extends State<AuthScreen> {
             '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
         await userCredential.user!.updateDisplayName(fullName);
       }
+
+      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+        'email': _emailController.text.trim(),
+        'role': 'user',
+      });
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -48,12 +56,12 @@ class _AuthScreenState extends State<AuthScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: Colors.grey[900],
-          title: const Text('Ошибка', style: TextStyle(color: Colors.white)),
+          title: const Text('Error', style: TextStyle(color: Colors.white)),
           content: Text(error.toString(), style: const TextStyle(color: Colors.white)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Закрыть', style: TextStyle(color: Colors.green)),
+              child: const Text('Close', style: TextStyle(color: Colors.green)),
             ),
           ],
         ),
@@ -89,7 +97,7 @@ class _AuthScreenState extends State<AuthScreen> {
               const Icon(Icons.music_note, size: 80, color: Colors.green),
               const SizedBox(height: 20),
               Text(
-                _isLogin ? 'Вход' : 'Регистрация',
+                _isLogin ? 'Sign in' : 'Sign up',
                 style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
@@ -98,11 +106,11 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Column(
                   children: [
                     if (!_isLogin) ...[
-                      _buildTextField(_firstNameController, 'Имя'),
-                      _buildTextField(_lastNameController, 'Фамилия'),
+                      _buildTextField(_firstNameController, 'Name'),
+                      _buildTextField(_lastNameController, 'Surname'),
                     ],
                     _buildTextField(_emailController, 'Email', TextInputType.emailAddress),
-                    _buildTextField(_passwordController, 'Пароль', TextInputType.visiblePassword, true),
+                    _buildTextField(_passwordController, 'Password', TextInputType.visiblePassword, true),
                     const SizedBox(height: 20),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -111,14 +119,14 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       onPressed: _submit,
                       child: Text(
-                        _isLogin ? 'Войти' : 'Зарегистрироваться',
+                        _isLogin ? 'Sign in' : 'Sign up',
                         style: const TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),
                     TextButton(
                       onPressed: _toggleAuthMode,
                       child: Text(
-                        _isLogin ? 'Создать аккаунт' : 'Уже есть аккаунт? Войти',
+                        _isLogin ? 'Create account' : 'Already have one? Sign in',
                         style: const TextStyle(color: Colors.grey, fontSize: 14),
                       ),
                     ),
@@ -154,7 +162,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return 'Введите $label';
+            return 'Enter $label';
           }
           return null;
         },

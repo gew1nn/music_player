@@ -33,13 +33,17 @@ class HomeScreen extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text('No songs found'));
           }
-          final songs = snapshot.data!.docs;
+          final songs = snapshot.data!.docs
+              .map((doc) => doc.data() as Map<String, dynamic>)
+              .toList();
+
           return ListView.builder(
             itemCount: songs.length,
             itemBuilder: (context, index) {
-              final song = songs[index].data() as Map<String, dynamic>;
-              final songId = songs[index].id;
-              return SongTile(song: song, songId: songId);
+              return SongTile(
+                songsList: songs,
+                initialIndex: index,
+              );
             },
           );
         },
@@ -49,10 +53,14 @@ class HomeScreen extends StatelessWidget {
 }
 
 class SongTile extends StatefulWidget {
-  final Map<String, dynamic> song;
-  final String songId;
+  final List<Map<String, dynamic>> songsList;
+  final int initialIndex;
 
-  const SongTile({super.key, required this.song, required this.songId});
+  const SongTile({
+    super.key,
+    required this.songsList,
+    required this.initialIndex,
+  });
 
   @override
   State<SongTile> createState() => _SongTileState();
@@ -74,7 +82,7 @@ class _SongTileState extends State<SongTile> {
           .collection('users')
           .doc(user.uid)
           .collection('favorites')
-          .where('url', isEqualTo: widget.song['url'])
+          .where('url', isEqualTo: widget.songsList[widget.initialIndex]['url'])
           .get();
 
       setState(() {
@@ -90,7 +98,7 @@ class _SongTileState extends State<SongTile> {
           .collection('users')
           .doc(user.uid)
           .collection('favorites')
-          .where('url', isEqualTo: widget.song['url'])
+          .where('url', isEqualTo: widget.songsList[widget.initialIndex]['url'])
           .get();
 
       if (favorites.docs.isEmpty) {
@@ -98,7 +106,7 @@ class _SongTileState extends State<SongTile> {
             .collection('users')
             .doc(user.uid)
             .collection('favorites')
-            .add(widget.song);
+            .add(widget.songsList[widget.initialIndex]);
       } else {
         await FirebaseFirestore.instance
             .collection('users')
@@ -116,11 +124,13 @@ class _SongTileState extends State<SongTile> {
 
   @override
   Widget build(BuildContext context) {
+    final song = widget.songsList[widget.initialIndex];
+
     return ListTile(
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
         child: Image.network(
-          widget.song['cover'],
+          song['cover'],
           width: 50,
           height: 50,
           fit: BoxFit.cover,
@@ -128,8 +138,8 @@ class _SongTileState extends State<SongTile> {
           const Icon(Icons.music_note),
         ),
       ),
-      title: Text(widget.song['title']),
-      subtitle: Text(widget.song['artist']),
+      title: Text(song['title']),
+      subtitle: Text(song['artist']),
       trailing: IconButton(
         icon: Icon(
           _isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -142,13 +152,8 @@ class _SongTileState extends State<SongTile> {
           context,
           MaterialPageRoute(
             builder: (context) => MusicPlayerScreen(
-              songs: [{
-                'title': widget.song['title'].toString(),
-                'artist': widget.song['artist'].toString(),
-                'cover': widget.song['cover'].toString(),
-                'url': widget.song['url'].toString(),
-              }],
-              initialIndex: 0,
+              songs: widget.songsList,
+              initialIndex: widget.initialIndex,
             ),
           ),
         );

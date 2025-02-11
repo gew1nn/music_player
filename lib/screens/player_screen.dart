@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+
 class MusicPlayerScreen extends StatefulWidget {
   final List<Map<String, dynamic>> songs;
   final int initialIndex;
@@ -23,13 +24,26 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
     super.initState();
     _audioPlayer = AudioPlayer();
     _currentIndex = widget.initialIndex;
+    _setupListeners();
     _playCurrentSong();
+  }
+
+  void _setupListeners() {
+    _audioPlayer.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        _nextSong();
+      }
+    });
   }
 
   Future<void> _playCurrentSong() async {
     try {
       final song = widget.songs[_currentIndex];
-      await _audioPlayer.setUrl(song['url']?.toString() ?? '');
+      final String url = song['url']?.toString().isNotEmpty == true
+          ? song['url']
+          : 'https://file-examples.com/storage/fe21422a6d67aa28993b797/2017/11/file_example_MP3_700KB.mp3';
+
+      await _audioPlayer.setUrl(url);
       _audioPlayer.play();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -38,19 +52,25 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
     }
   }
 
-  void _nextSong() {
-    setState(() {
-      _currentIndex = (_currentIndex + 1) % widget.songs.length;
-    });
-    _playCurrentSong();
+  Future<void> _nextSong() async {
+    if (widget.songs.isNotEmpty) {
+      await _audioPlayer.stop();
+      setState(() {
+        _currentIndex = (_currentIndex + 1) % widget.songs.length;
+      });
+      await _playCurrentSong();
+    }
   }
 
-  void _previousSong() {
-    setState(() {
-      _currentIndex =
-          (_currentIndex - 1 + widget.songs.length) % widget.songs.length;
-    });
-    _playCurrentSong();
+  Future<void> _previousSong() async {
+    if (widget.songs.isNotEmpty) {
+      await _audioPlayer.stop();
+      setState(() {
+        _currentIndex =
+            (_currentIndex - 1 + widget.songs.length) % widget.songs.length;
+      });
+      await _playCurrentSong();
+    }
   }
 
   @override
@@ -75,7 +95,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(16.0),
               child: Image.network(
-                currentSong['cover']?.toString() ?? '',
+                currentSong['cover']?.toString().isNotEmpty == true
+                    ? currentSong['cover']
+                    : 'https://cdn.creazilla.com/icons/3431524/music-icon-md.png',
                 width: 300,
                 height: 300,
                 fit: BoxFit.cover,

@@ -20,7 +20,7 @@ class SpotifyAuth {
       final data = jsonDecode(response.body);
       return data['access_token'];
     } else {
-      print('Ошибка получения токена: ${response.body}');
+      print('Error getting token: ${response.body}');
       return null;
     }
   }

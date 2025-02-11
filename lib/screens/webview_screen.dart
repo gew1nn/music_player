@@ -16,10 +16,9 @@ class _WebViewContainerState extends State<WebViewContainer> {
   @override
   void initState() {
     super.initState();
-    // Инициализация WebViewController
     controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted) // Включаем JS (или используем disabled, если не нужен)
-      ..loadRequest(Uri.parse(widget.url)); // Загружаем URL из widget.url
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadRequest(Uri.parse(widget.url));
   }
 
   @override
